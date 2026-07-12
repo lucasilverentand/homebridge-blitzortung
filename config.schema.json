@@ -1,0 +1,117 @@
+{
+  "pluginAlias": "Blitzortung",
+  "pluginType": "platform",
+  "singular": true,
+  "schema": {
+    "type": "object",
+    "required": ["latitude", "longitude", "mqttHost"],
+    "properties": {
+      "name": {
+        "title": "Name",
+        "type": "string",
+        "default": "Lightning",
+        "minLength": 1
+      },
+      "latitude": {
+        "title": "Latitude",
+        "type": "number",
+        "minimum": -90,
+        "maximum": 90,
+        "required": true
+      },
+      "longitude": {
+        "title": "Longitude",
+        "type": "number",
+        "minimum": -180,
+        "maximum": 180,
+        "required": true
+      },
+      "radiusKm": {
+        "title": "Detection Radius (km)",
+        "type": "number",
+        "default": 25,
+        "minimum": 1,
+        "maximum": 500
+      },
+      "strikeAlertSeconds": {
+        "title": "Strike Alert Duration (seconds)",
+        "type": "integer",
+        "default": 30,
+        "minimum": 1,
+        "maximum": 3600
+      },
+      "stormClearMinutes": {
+        "title": "Storm Clear Duration (minutes)",
+        "type": "integer",
+        "default": 30,
+        "minimum": 1,
+        "maximum": 1440
+      },
+      "mqttHost": {
+        "title": "MQTT Relay Host",
+        "type": "string",
+        "minLength": 1,
+        "required": true
+      },
+      "mqttPort": {
+        "title": "MQTT Relay Port",
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 65535
+      },
+      "mqttTls": {
+        "title": "Use TLS",
+        "type": "boolean",
+        "default": false
+      },
+      "mqttUsername": {
+        "title": "MQTT Username",
+        "type": "string"
+      },
+      "mqttPasswordEnvironmentVariable": {
+        "title": "MQTT Password Environment Variable",
+        "type": "string",
+        "description": "Name of an environment variable containing the MQTT password."
+      },
+      "topicPrefix": {
+        "title": "MQTT Topic Prefix",
+        "type": "string",
+        "default": "blitzortung/1.1"
+      }
+    }
+  },
+  "layout": [
+    "name",
+    {
+      "key": "location",
+      "type": "fieldset",
+      "title": "Location",
+      "expandable": true,
+      "expanded": true,
+      "items": ["latitude", "longitude", "radiusKm"]
+    },
+    {
+      "key": "alerts",
+      "type": "fieldset",
+      "title": "Alerts",
+      "expandable": true,
+      "expanded": true,
+      "items": ["strikeAlertSeconds", "stormClearMinutes"]
+    },
+    {
+      "key": "mqtt",
+      "type": "fieldset",
+      "title": "Blitzortung MQTT Relay",
+      "expandable": true,
+      "expanded": true,
+      "items": [
+        "mqttHost",
+        "mqttPort",
+        "mqttTls",
+        "mqttUsername",
+        "mqttPasswordEnvironmentVariable",
+        "topicPrefix"
+      ]
+    }
+  ]
+}

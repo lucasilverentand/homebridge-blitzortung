@@ -1,0 +1,20 @@
+{
+  "bridge": {
+    "name": "Blitzortung Test",
+    "username": "0E:7A:11:22:33:44",
+    "port": 51900,
+    "pin": "031-45-154"
+  },
+  "accessories": [],
+  "platforms": [
+    {
+      "platform": "Blitzortung",
+      "name": "Lightning",
+      "latitude": 52.3676,
+      "longitude": 4.9041,
+      "radiusKm": 25,
+      "mqttHost": "127.0.0.1",
+      "mqttPort": 51883
+    }
+  ]
+}

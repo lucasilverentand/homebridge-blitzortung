@@ -1,0 +1,61 @@
+{
+  "name": "homebridge-blitzortung",
+  "displayName": "Homebridge Blitzortung",
+  "version": "0.1.0",
+  "description": "Expose nearby Blitzortung lightning strikes as sensors in Apple Home.",
+  "type": "module",
+  "author": "Luca Silverentand",
+  "license": "MIT",
+  "homepage": "https://github.com/lucasilverentand/homebridge-blitzortung#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lucasilverentand/homebridge-blitzortung.git"
+  },
+  "bugs": {
+    "url": "https://github.com/lucasilverentand/homebridge-blitzortung/issues"
+  },
+  "keywords": [
+    "homebridge-plugin",
+    "homekit",
+    "blitzortung",
+    "lightning",
+    "weather"
+  ],
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "config.schema.json",
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
+  "engines": {
+    "homebridge": "^1.8.0 || ^2.0.0",
+    "node": "^22.10.0 || ^24.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "rimraf dist && tsc",
+    "lint": "eslint . --max-warnings=0",
+    "prepublishOnly": "npm run check",
+    "test": "vitest run",
+    "check": "npm run lint && npm test && npm run build"
+  },
+  "dependencies": {
+    "mqtt": "^5.15.2",
+    "ngeohash": "^0.6.3"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/ngeohash": "^0.6.8",
+    "@types/node": "^25.6.0",
+    "eslint": "^10.0.0",
+    "homebridge": "^2.1.1",
+    "rimraf": "^6.1.3",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.59.2",
+    "vitest": "^4.0.18"
+  }
+}
