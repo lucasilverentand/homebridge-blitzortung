@@ -20,6 +20,8 @@ export interface BlitzortungClientEvents {
 
 type MqttFactory = (url: string, options: IClientOptions) => MqttClient;
 
+const RECONNECT_PERIOD_MS = 60_000;
+
 export class BlitzortungClient extends EventEmitter<BlitzortungClientEvents> {
   private client?: MqttClient;
   private readonly topics: string[];
@@ -47,7 +49,7 @@ export class BlitzortungClient extends EventEmitter<BlitzortungClientEvents> {
     this.client = this.connectMqtt(url, {
       username: this.config.mqttUsername,
       password: this.config.mqttPassword,
-      reconnectPeriod: 5000,
+      reconnectPeriod: RECONNECT_PERIOD_MS,
       connectTimeout: 10_000,
       clean: true,
     });

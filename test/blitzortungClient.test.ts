@@ -52,4 +52,16 @@ describe('BlitzortungClient', () => {
     mqttClient.emit('message', 'topic', Buffer.from('{'));
     expect(error).toHaveBeenCalledOnce();
   });
+
+  it('uses a relay-friendly reconnect period', () => {
+    const mqttClient = new FakeMqttClient();
+    const connect = vi.fn(() => mqttClient as unknown as MqttClient);
+    const client = new BlitzortungClient(config, connect);
+
+    client.connect();
+
+    expect(connect).toHaveBeenCalledWith('mqtt://mqtt.example.net:1883', expect.objectContaining({
+      reconnectPeriod: 60_000,
+    }));
+  });
 });
