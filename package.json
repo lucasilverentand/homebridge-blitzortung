@@ -39,6 +39,7 @@
   "scripts": {
     "build": "rimraf dist && tsc",
     "lint": "eslint . --max-warnings=0",
+    "prepare": "npm run build",
     "prepublishOnly": "npm run check",
     "test": "vitest run",
     "check": "npm run lint && npm test && npm run build"
