@@ -183,7 +183,7 @@
       ]
     },
     {
-      "key": "camera",
+      "key": "cameraSettings",
       "type": "fieldset",
       "title": "Lightning Map Camera",
       "expandable": true,
