@@ -89,6 +89,11 @@ second location. The plugin bundles FFmpeg and renders H.264 video for HomeKit, 
 FFmpeg installation is normally required. Set `camera.ffmpegPath` only when you need to override
 the bundled binary.
 
+Homebridge publishes the map as a standalone external camera so HomeKit can reach its snapshot
+and video handlers directly. After enabling the camera and restarting the plugin, add the
+`Lightning Map` accessory separately in Apple Home with the setup code shown in the Homebridge
+log. Upgrading from 0.2.0 removes the old unresponsive bridged camera automatically.
+
 OpenStreetMap is the default tile provider. The plugin identifies itself in tile requests, renders
 the required attribution on the camera image, and keeps downloaded tiles for at least seven days.
 If you configure a different `camera.tileUrlTemplate`, also set the attribution and user agent
