@@ -1,7 +1,7 @@
 {
   "name": "homebridge-blitzortung",
   "displayName": "Homebridge Blitzortung",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Expose nearby Blitzortung lightning activity in Apple Home.",
   "type": "module",
   "author": "Luca Silverentand",

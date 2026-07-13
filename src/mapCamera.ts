@@ -5,8 +5,6 @@ import { setTimeout as delay } from 'node:timers/promises';
 
 import bundledFfmpegPath from 'ffmpeg-for-homebridge';
 import {
-  AudioStreamingCodecType,
-  AudioStreamingSamplerate,
   H264Level,
   H264Profile,
   SRTPCryptoSuites,
@@ -107,12 +105,6 @@ export class LightningMapCamera implements CameraStreamingDelegate {
             [1600, 1200, 30],
             [1920, 1080, 30],
           ],
-        },
-        audio: {
-          codecs: [{
-            type: AudioStreamingCodecType.AAC_ELD,
-            samplerate: AudioStreamingSamplerate.KHZ_16,
-          }],
         },
       },
     });

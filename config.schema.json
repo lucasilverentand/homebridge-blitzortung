@@ -130,7 +130,7 @@
           "tileUserAgent": {
             "title": "Tile Request User Agent",
             "type": "string",
-            "default": "homebridge-blitzortung/0.2.2 (+https://github.com/lucasilverentand/homebridge-blitzortung)",
+            "default": "homebridge-blitzortung/0.2.3 (+https://github.com/lucasilverentand/homebridge-blitzortung)",
             "minLength": 1
           },
           "tileCacheDays": {

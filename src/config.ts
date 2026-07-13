@@ -135,7 +135,7 @@ function resolveCameraConfig(value: unknown): ResolvedLightningMapCameraConfig {
     tileAttribution: optionalString(camera.tileAttribution, 'camera.tileAttribution')
       ?? '© OpenStreetMap contributors',
     tileUserAgent: optionalString(camera.tileUserAgent, 'camera.tileUserAgent')
-      ?? 'homebridge-blitzortung/0.2.2 (+https://github.com/lucasilverentand/homebridge-blitzortung)',
+      ?? 'homebridge-blitzortung/0.2.3 (+https://github.com/lucasilverentand/homebridge-blitzortung)',
     tileCacheDays: finiteInteger(camera.tileCacheDays ?? 7, 'camera.tileCacheDays', 7, 365),
     ffmpegPath: optionalString(camera.ffmpegPath, 'camera.ffmpegPath'),
   };

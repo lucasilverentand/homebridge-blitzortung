@@ -33,6 +33,6 @@ describe('LightningMapCamera', () => {
     expect(options?.streamingOptions.video.resolutions).toContainEqual([320, 240, 15]);
     expect(options?.streamingOptions.video.resolutions).toContainEqual([1280, 720, 30]);
     expect(options?.streamingOptions.video.resolutions).toContainEqual([1920, 1080, 30]);
-    expect(options?.streamingOptions.audio?.codecs).toHaveLength(1);
+    expect(options?.streamingOptions.audio).toBeUndefined();
   });
 });
