@@ -107,7 +107,11 @@ export class LightningMapCamera implements CameraStreamingDelegate {
   public handleSnapshotRequest(request: SnapshotRequest, callback: SnapshotRequestCallback): void {
     void this.renderer.frame(request.width, request.height)
       .then(buffer => callback(undefined, buffer))
-      .catch(error => callback(error instanceof Error ? error : new Error(String(error))));
+      .catch(error => {
+        const snapshotError = error instanceof Error ? error : new Error(String(error));
+        this.log.warn('Lightning map snapshot failed: %s', snapshotError.message);
+        callback(snapshotError);
+      });
   }
 
   public prepareStream(
@@ -133,7 +137,11 @@ export class LightningMapCamera implements CameraStreamingDelegate {
           },
         });
       })
-      .catch(error => callback(error instanceof Error ? error : new Error(String(error))));
+      .catch(error => {
+        const streamError = error instanceof Error ? error : new Error(String(error));
+        this.log.warn('Lightning map stream preparation failed: %s', streamError.message);
+        callback(streamError);
+      });
   }
 
   public handleStreamRequest(request: StreamingRequest, callback: StreamRequestCallback): void {
@@ -208,6 +216,7 @@ export class LightningMapCamera implements CameraStreamingDelegate {
       callback();
     });
     process.once('error', error => {
+      this.log.warn('Lightning map FFmpeg failed to start: %s', error.message);
       if (!callbackSent) {
         callbackSent = true;
         callback(error);

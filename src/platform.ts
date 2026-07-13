@@ -59,21 +59,16 @@ export class BlitzortungPlatform implements DynamicPlatformPlugin {
 
     if (this.config.camera.enabled) {
       const cameraUuid = this.api.hap.uuid.generate('homebridge-blitzortung:lightning-map-camera');
-      desiredUuids.add(cameraUuid);
-      const cameraAccessory = this.cachedAccessories.find(candidate => candidate.UUID === cameraUuid)
-        ?? new this.api.platformAccessory(
-          this.config.camera.name,
-          cameraUuid,
-          this.api.hap.Categories.IP_CAMERA,
-        );
-      if (!this.cachedAccessories.some(candidate => candidate.UUID === cameraUuid)) {
-        newAccessories.push(cameraAccessory);
-      }
+      const cameraAccessory = new this.api.platformAccessory(
+        this.config.camera.name,
+        cameraUuid,
+        this.api.hap.Categories.IP_CAMERA,
+      );
       cameraAccessory.getService(this.api.hap.Service.AccessoryInformation)
         ?.setCharacteristic(this.api.hap.Characteristic.Manufacturer, 'Blitzortung.org')
         .setCharacteristic(this.api.hap.Characteristic.Model, 'Lightning Map Camera')
         .setCharacteristic(this.api.hap.Characteristic.SerialNumber, cameraUuid)
-        .setCharacteristic(this.api.hap.Characteristic.FirmwareRevision, '0.2.0');
+        .setCharacteristic(this.api.hap.Characteristic.FirmwareRevision, '0.2.1');
       this.mapRenderer = new LightningMapRenderer({
         config: this.config,
         cacheDirectory: path.join(
@@ -85,6 +80,13 @@ export class BlitzortungPlatform implements DynamicPlatformPlugin {
       });
       this.mapCamera = new LightningMapCamera(this.log, this.api, this.config, this.mapRenderer);
       cameraAccessory.configureController(this.mapCamera.controller);
+      this.api.publishExternalAccessories(PLUGIN_NAME, [cameraAccessory]);
+      void this.mapRenderer.frame(640, 360).catch(error => {
+        this.log.warn(
+          'Lightning map pre-render failed: %s',
+          error instanceof Error ? error.message : String(error),
+        );
+      });
     }
 
     if (newAccessories.length > 0) {
@@ -99,7 +101,7 @@ export class BlitzortungPlatform implements DynamicPlatformPlugin {
       ?.setCharacteristic(this.api.hap.Characteristic.Manufacturer, 'Blitzortung.org')
       .setCharacteristic(this.api.hap.Characteristic.Model, 'Nearby Lightning Feed')
       .setCharacteristic(this.api.hap.Characteristic.SerialNumber, sensorUuid)
-      .setCharacteristic(this.api.hap.Characteristic.FirmwareRevision, '0.2.0');
+      .setCharacteristic(this.api.hap.Characteristic.FirmwareRevision, '0.2.1');
 
     this.state = new LightningState(
       this.config.strikeAlertSeconds * 1000,
