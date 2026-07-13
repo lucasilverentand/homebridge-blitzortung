@@ -1,10 +1,11 @@
 # Homebridge Blitzortung
 
-Expose nearby Blitzortung lightning activity as supported sensors in Apple Home.
+Expose nearby Blitzortung lightning activity in Apple Home.
 
 The plugin subscribes to geohash-filtered strike messages from a configurable MQTT relay,
 calculates the distance from a configured location, and ignores strikes outside the detection
-radius. It does not require Home Assistant.
+radius. It can also expose an optional HomeKit camera containing a live map of the configured
+area and recent lightning. It does not require Home Assistant.
 
 ## HomeKit representation
 
@@ -15,6 +16,8 @@ plugin therefore exposes two standard sensors:
   for Apple Home notifications and immediate automations.
 - **Storm Nearby** is an occupancy sensor that remains active until no nearby strikes have been
   observed for the configured clear period.
+- **Lightning Map** is an optional camera. Its snapshot and live video show the detection radius,
+  feed state, and recent strikes, with newer strikes drawn more prominently.
 
 Distance and strike count are intentionally not encoded into unrelated HomeKit characteristics.
 The exact distance is available in the Homebridge log.
@@ -65,12 +68,43 @@ Then add the platform in Homebridge:
   "mqttTls": true,
   "mqttUsername": "homebridge",
   "mqttPasswordEnvironmentVariable": "BLITZORTUNG_MQTT_PASSWORD",
-  "topicPrefix": "blitzortung/1.1"
+  "topicPrefix": "blitzortung/1.1",
+  "camera": {
+    "enabled": true,
+    "name": "Lightning Map",
+    "zoom": 9,
+    "strikeHistoryMinutes": 60,
+    "refreshSeconds": 10
+  }
 }
 ```
 
 Run this plugin as a Homebridge child bridge so feed failures or upgrades do not affect unrelated
 accessories.
+
+### Map camera
+
+The map camera uses the platform's `latitude`, `longitude`, and `radiusKm`; it does not need a
+second location. The plugin bundles FFmpeg and renders H.264 video for HomeKit, so no system
+FFmpeg installation is normally required. Set `camera.ffmpegPath` only when you need to override
+the bundled binary.
+
+OpenStreetMap is the default tile provider. The plugin identifies itself in tile requests, renders
+the required attribution on the camera image, and keeps downloaded tiles for at least seven days.
+If you configure a different `camera.tileUrlTemplate`, also set the attribution and user agent
+required by that provider. Avoid using a tile service that prohibits server-side rendering.
+
+Camera settings:
+
+- `enabled`: add or remove the map camera accessory; defaults to `false`.
+- `zoom`: map zoom from 1–18; defaults to `9`.
+- `strikeHistoryMinutes`: how long strikes remain on the map; defaults to `60`.
+- `refreshSeconds`: minimum time between map renders; defaults to `10`.
+- `tileUrlTemplate`: tile URL containing `{z}`, `{x}`, and `{y}`.
+- `tileAttribution`: attribution drawn on every frame.
+- `tileUserAgent`: identification sent with tile requests.
+- `tileCacheDays`: disk-cache lifetime; the minimum is seven days.
+- `ffmpegPath`: optional custom FFmpeg executable.
 
 ## Development
 

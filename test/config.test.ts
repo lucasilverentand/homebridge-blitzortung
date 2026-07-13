@@ -19,6 +19,14 @@ describe('resolveConfig', () => {
       mqttPort: 1883,
       mqttTls: false,
       topicPrefix: 'blitzortung/1.1',
+      camera: {
+        enabled: false,
+        name: 'Lightning Map',
+        zoom: 9,
+        strikeHistoryMinutes: 60,
+        refreshSeconds: 10,
+        tileCacheDays: 7,
+      },
     });
   });
 
@@ -35,5 +43,32 @@ describe('resolveConfig', () => {
       mqttPasswordEnvironmentVariable: 'BLITZORTUNG_PASSWORD',
     }, {})).toThrow('BLITZORTUNG_PASSWORD');
     expect(() => resolveConfig({ ...baseConfig, latitude: 91 }, {})).toThrow('latitude');
+  });
+
+  it('validates and resolves map camera configuration', () => {
+    const resolved = resolveConfig({
+      ...baseConfig,
+      camera: {
+        enabled: true,
+        zoom: 10,
+        strikeHistoryMinutes: 90,
+        tileUrlTemplate: 'https://maps.example.net/{z}/{x}/{y}.png',
+        tileAttribution: 'Example Maps',
+      },
+    }, {});
+    expect(resolved.camera).toMatchObject({
+      enabled: true,
+      zoom: 10,
+      strikeHistoryMinutes: 90,
+      tileAttribution: 'Example Maps',
+    });
+    expect(() => resolveConfig({
+      ...baseConfig,
+      camera: { tileUrlTemplate: 'https://maps.example.net/no-placeholders.png' },
+    }, {})).toThrow('{z}');
+    expect(() => resolveConfig({
+      ...baseConfig,
+      camera: { tileCacheDays: 1 },
+    }, {})).toThrow('tileCacheDays');
   });
 });

@@ -14,7 +14,10 @@
       "longitude": 4.9041,
       "radiusKm": 25,
       "mqttHost": "127.0.0.1",
-      "mqttPort": 51883
+      "mqttPort": 51883,
+      "camera": {
+        "enabled": true
+      }
     }
   ]
 }

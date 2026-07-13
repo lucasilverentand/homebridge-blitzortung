@@ -77,6 +77,75 @@
         "title": "MQTT Topic Prefix",
         "type": "string",
         "default": "blitzortung/1.1"
+      },
+      "camera": {
+        "title": "Lightning Map Camera",
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "title": "Enable Camera",
+            "type": "boolean",
+            "default": false,
+            "description": "Add a HomeKit camera showing the configured detection radius and recent lightning strikes."
+          },
+          "name": {
+            "title": "Camera Name",
+            "type": "string",
+            "default": "Lightning Map",
+            "minLength": 1
+          },
+          "zoom": {
+            "title": "Map Zoom",
+            "type": "integer",
+            "default": 9,
+            "minimum": 1,
+            "maximum": 18
+          },
+          "strikeHistoryMinutes": {
+            "title": "Strike History (minutes)",
+            "type": "integer",
+            "default": 60,
+            "minimum": 1,
+            "maximum": 1440
+          },
+          "refreshSeconds": {
+            "title": "Map Refresh (seconds)",
+            "type": "integer",
+            "default": 10,
+            "minimum": 5,
+            "maximum": 300
+          },
+          "tileUrlTemplate": {
+            "title": "Map Tile URL",
+            "type": "string",
+            "default": "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+            "description": "HTTP(S) tile template containing {z}, {x}, and {y}."
+          },
+          "tileAttribution": {
+            "title": "Map Attribution",
+            "type": "string",
+            "default": "© OpenStreetMap contributors",
+            "minLength": 1
+          },
+          "tileUserAgent": {
+            "title": "Tile Request User Agent",
+            "type": "string",
+            "default": "homebridge-blitzortung/0.2.0 (+https://github.com/lucasilverentand/homebridge-blitzortung)",
+            "minLength": 1
+          },
+          "tileCacheDays": {
+            "title": "Tile Cache Duration (days)",
+            "type": "integer",
+            "default": 7,
+            "minimum": 7,
+            "maximum": 365
+          },
+          "ffmpegPath": {
+            "title": "Custom FFmpeg Path",
+            "type": "string",
+            "description": "Optional. Leave empty to use the FFmpeg binary bundled with the plugin."
+          }
+        }
       }
     }
   },
@@ -111,6 +180,25 @@
         "mqttUsername",
         "mqttPasswordEnvironmentVariable",
         "topicPrefix"
+      ]
+    },
+    {
+      "key": "camera",
+      "type": "fieldset",
+      "title": "Lightning Map Camera",
+      "expandable": true,
+      "expanded": false,
+      "items": [
+        "camera.enabled",
+        "camera.name",
+        "camera.zoom",
+        "camera.strikeHistoryMinutes",
+        "camera.refreshSeconds",
+        "camera.tileUrlTemplate",
+        "camera.tileAttribution",
+        "camera.tileUserAgent",
+        "camera.tileCacheDays",
+        "camera.ffmpegPath"
       ]
     }
   ]

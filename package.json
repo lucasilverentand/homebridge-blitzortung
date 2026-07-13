@@ -1,8 +1,8 @@
 {
   "name": "homebridge-blitzortung",
   "displayName": "Homebridge Blitzortung",
-  "version": "0.1.0",
-  "description": "Expose nearby Blitzortung lightning strikes as sensors in Apple Home.",
+  "version": "0.2.0",
+  "description": "Expose nearby Blitzortung lightning activity in Apple Home.",
   "type": "module",
   "author": "Luca Silverentand",
   "license": "MIT",
@@ -45,8 +45,10 @@
     "check": "npm run lint && npm test && npm run build"
   },
   "dependencies": {
+    "ffmpeg-for-homebridge": "^2.2.2",
     "mqtt": "^5.15.2",
-    "ngeohash": "^0.6.3"
+    "ngeohash": "^0.6.3",
+    "sharp": "^0.35.3"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
@@ -58,5 +60,8 @@
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.59.2",
     "vitest": "^4.0.18"
+  },
+  "allowScripts": {
+    "ffmpeg-for-homebridge@2.2.2": true
   }
 }

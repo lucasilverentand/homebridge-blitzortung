@@ -5,10 +5,13 @@ import type {
   PlatformAccessory,
   PlatformConfig,
 } from 'homebridge';
+import path from 'node:path';
 
 import { BlitzortungClient } from './blitzortungClient.js';
 import { resolveConfig, type BlitzortungPlatformConfig, type ResolvedConfig } from './config.js';
 import { LightningState } from './lightningState.js';
+import { LightningMapCamera } from './mapCamera.js';
+import { LightningMapRenderer } from './mapRenderer.js';
 import { LightningAccessory } from './platformAccessory.js';
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings.js';
 
@@ -17,6 +20,8 @@ export class BlitzortungPlatform implements DynamicPlatformPlugin {
   private readonly config?: ResolvedConfig;
   private client?: BlitzortungClient;
   private state?: LightningState;
+  private mapCamera?: LightningMapCamera;
+  private mapRenderer?: LightningMapRenderer;
 
   constructor(
     private readonly log: Logger,
@@ -43,14 +48,49 @@ export class BlitzortungPlatform implements DynamicPlatformPlugin {
       return;
     }
 
-    const uuid = this.api.hap.uuid.generate('homebridge-blitzortung:nearby-lightning');
-    const accessory = this.cachedAccessories.find(candidate => candidate.UUID === uuid)
-      ?? new this.api.platformAccessory(this.config.name, uuid);
-
-    if (!this.cachedAccessories.some(candidate => candidate.UUID === uuid)) {
-      this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
+    const sensorUuid = this.api.hap.uuid.generate('homebridge-blitzortung:nearby-lightning');
+    const accessory = this.cachedAccessories.find(candidate => candidate.UUID === sensorUuid)
+      ?? new this.api.platformAccessory(this.config.name, sensorUuid);
+    const newAccessories: PlatformAccessory[] = [];
+    const desiredUuids = new Set([sensorUuid]);
+    if (!this.cachedAccessories.some(candidate => candidate.UUID === sensorUuid)) {
+      newAccessories.push(accessory);
     }
-    const stale = this.cachedAccessories.filter(candidate => candidate.UUID !== uuid);
+
+    if (this.config.camera.enabled) {
+      const cameraUuid = this.api.hap.uuid.generate('homebridge-blitzortung:lightning-map-camera');
+      desiredUuids.add(cameraUuid);
+      const cameraAccessory = this.cachedAccessories.find(candidate => candidate.UUID === cameraUuid)
+        ?? new this.api.platformAccessory(
+          this.config.camera.name,
+          cameraUuid,
+          this.api.hap.Categories.IP_CAMERA,
+        );
+      if (!this.cachedAccessories.some(candidate => candidate.UUID === cameraUuid)) {
+        newAccessories.push(cameraAccessory);
+      }
+      cameraAccessory.getService(this.api.hap.Service.AccessoryInformation)
+        ?.setCharacteristic(this.api.hap.Characteristic.Manufacturer, 'Blitzortung.org')
+        .setCharacteristic(this.api.hap.Characteristic.Model, 'Lightning Map Camera')
+        .setCharacteristic(this.api.hap.Characteristic.SerialNumber, cameraUuid)
+        .setCharacteristic(this.api.hap.Characteristic.FirmwareRevision, '0.2.0');
+      this.mapRenderer = new LightningMapRenderer({
+        config: this.config,
+        cacheDirectory: path.join(
+          this.api.user.storagePath(),
+          'homebridge-blitzortung',
+          'map-tiles',
+        ),
+        warn: message => this.log.warn('%s', message),
+      });
+      this.mapCamera = new LightningMapCamera(this.log, this.api, this.config, this.mapRenderer);
+      cameraAccessory.configureController(this.mapCamera.controller);
+    }
+
+    if (newAccessories.length > 0) {
+      this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, newAccessories);
+    }
+    const stale = this.cachedAccessories.filter(candidate => !desiredUuids.has(candidate.UUID));
     if (stale.length > 0) {
       this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, stale);
     }
@@ -58,8 +98,8 @@ export class BlitzortungPlatform implements DynamicPlatformPlugin {
     accessory.getService(this.api.hap.Service.AccessoryInformation)
       ?.setCharacteristic(this.api.hap.Characteristic.Manufacturer, 'Blitzortung.org')
       .setCharacteristic(this.api.hap.Characteristic.Model, 'Nearby Lightning Feed')
-      .setCharacteristic(this.api.hap.Characteristic.SerialNumber, uuid)
-      .setCharacteristic(this.api.hap.Characteristic.FirmwareRevision, '0.1.0');
+      .setCharacteristic(this.api.hap.Characteristic.SerialNumber, sensorUuid)
+      .setCharacteristic(this.api.hap.Characteristic.FirmwareRevision, '0.2.0');
 
     this.state = new LightningState(
       this.config.strikeAlertSeconds * 1000,
@@ -85,15 +125,23 @@ export class BlitzortungPlatform implements DynamicPlatformPlugin {
         this.client?.subscriptions().length ?? 0,
       );
       lightningAccessory.setConnected(true);
+      this.mapRenderer?.setConnected(true);
     });
-    this.client.on('disconnected', () => lightningAccessory.setConnected(false));
+    this.client.on('disconnected', () => {
+      lightningAccessory.setConnected(false);
+      this.mapRenderer?.setConnected(false);
+    });
     this.client.on('error', error => this.log.warn('Blitzortung feed error: %s', error.message));
-    this.client.on('strike', strike => this.state?.recordStrike(strike.distanceKm, strike.receivedAt));
+    this.client.on('strike', strike => {
+      this.state?.recordStrike(strike.distanceKm, strike.receivedAt);
+      this.mapRenderer?.recordStrike(strike);
+    });
     this.client.connect();
   }
 
   private shutdown(): void {
     this.state?.dispose();
+    this.mapCamera?.stop();
     void this.client?.disconnect();
   }
 }
