@@ -68,7 +68,7 @@ export class BlitzortungPlatform implements DynamicPlatformPlugin {
         ?.setCharacteristic(this.api.hap.Characteristic.Manufacturer, 'Blitzortung.org')
         .setCharacteristic(this.api.hap.Characteristic.Model, 'Lightning Map Camera')
         .setCharacteristic(this.api.hap.Characteristic.SerialNumber, cameraUuid)
-        .setCharacteristic(this.api.hap.Characteristic.FirmwareRevision, '0.2.1');
+        .setCharacteristic(this.api.hap.Characteristic.FirmwareRevision, '0.2.2');
       this.mapRenderer = new LightningMapRenderer({
         config: this.config,
         cacheDirectory: path.join(
@@ -81,7 +81,10 @@ export class BlitzortungPlatform implements DynamicPlatformPlugin {
       this.mapCamera = new LightningMapCamera(this.log, this.api, this.config, this.mapRenderer);
       cameraAccessory.configureController(this.mapCamera.controller);
       this.api.publishExternalAccessories(PLUGIN_NAME, [cameraAccessory]);
-      void this.mapRenderer.frame(640, 360).catch(error => {
+      void Promise.all([
+        this.mapRenderer.frame(640, 360),
+        this.mapRenderer.frame(1280, 720),
+      ]).catch(error => {
         this.log.warn(
           'Lightning map pre-render failed: %s',
           error instanceof Error ? error.message : String(error),
@@ -101,7 +104,7 @@ export class BlitzortungPlatform implements DynamicPlatformPlugin {
       ?.setCharacteristic(this.api.hap.Characteristic.Manufacturer, 'Blitzortung.org')
       .setCharacteristic(this.api.hap.Characteristic.Model, 'Nearby Lightning Feed')
       .setCharacteristic(this.api.hap.Characteristic.SerialNumber, sensorUuid)
-      .setCharacteristic(this.api.hap.Characteristic.FirmwareRevision, '0.2.1');
+      .setCharacteristic(this.api.hap.Characteristic.FirmwareRevision, '0.2.2');
 
     this.state = new LightningState(
       this.config.strikeAlertSeconds * 1000,

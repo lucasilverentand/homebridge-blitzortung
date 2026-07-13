@@ -5,6 +5,8 @@ import { setTimeout as delay } from 'node:timers/promises';
 
 import bundledFfmpegPath from 'ffmpeg-for-homebridge';
 import {
+  AudioStreamingCodecType,
+  AudioStreamingSamplerate,
   H264Level,
   H264Profile,
   SRTPCryptoSuites,
@@ -83,7 +85,7 @@ export class LightningMapCamera implements CameraStreamingDelegate {
     private readonly renderer: LightningMapRenderer,
   ) {
     this.controller = new api.hap.CameraController({
-      cameraStreamCount: 1,
+      cameraStreamCount: 2,
       delegate: this,
       streamingOptions: {
         supportedCryptoSuites: [SRTPCryptoSuites.AES_CM_128_HMAC_SHA1_80],
@@ -93,20 +95,42 @@ export class LightningMapCamera implements CameraStreamingDelegate {
             levels: [H264Level.LEVEL3_1, H264Level.LEVEL3_2, H264Level.LEVEL4_0],
           },
           resolutions: [
-            [320, 180, 15],
+            [320, 180, 30],
             [320, 240, 15],
-            [640, 360, 15],
-            [640, 480, 15],
-            [1280, 720, 15],
+            [320, 240, 30],
+            [480, 270, 30],
+            [480, 360, 30],
+            [640, 360, 30],
+            [640, 480, 30],
+            [1280, 720, 30],
+            [1280, 960, 30],
+            [1600, 1200, 30],
+            [1920, 1080, 30],
           ],
+        },
+        audio: {
+          codecs: [{
+            type: AudioStreamingCodecType.AAC_ELD,
+            samplerate: AudioStreamingSamplerate.KHZ_16,
+          }],
         },
       },
     });
   }
 
   public handleSnapshotRequest(request: SnapshotRequest, callback: SnapshotRequestCallback): void {
+    const startedAt = Date.now();
+    this.log.debug('Lightning map snapshot requested at %dx%d.', request.width, request.height);
     void this.renderer.frame(request.width, request.height)
-      .then(buffer => callback(undefined, buffer))
+      .then(buffer => {
+        this.log.debug(
+          'Lightning map snapshot rendered at %dx%d in %d ms.',
+          request.width,
+          request.height,
+          Date.now() - startedAt,
+        );
+        callback(undefined, buffer);
+      })
       .catch(error => {
         const snapshotError = error instanceof Error ? error : new Error(String(error));
         this.log.warn('Lightning map snapshot failed: %s', snapshotError.message);

@@ -177,6 +177,7 @@ describe('BlitzortungPlatform camera publication', () => {
     expect(cameras[0]).toMatchObject({ displayName: 'Lightning Map', category: 17 });
     expect(cameras[0]?.controller).toBeDefined();
     expect(frame).toHaveBeenCalledWith(640, 360);
+    expect(frame).toHaveBeenCalledWith(1280, 720);
     expect(connect).toHaveBeenCalledOnce();
   });
 
