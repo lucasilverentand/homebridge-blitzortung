@@ -44,6 +44,14 @@ Configure a relay you are authorized to use.
 - Node.js 22 or 24
 - An authorized Blitzortung-compatible MQTT relay
 
+## Installation
+
+Install through Homebridge UI by searching for **Homebridge Blitzortung**, or install from npm:
+
+```sh
+npm install -g homebridge-blitzortung
+```
+
 ## Configuration
 
 Store an MQTT password in the environment used to launch Homebridge:
@@ -118,6 +126,9 @@ npm install
 npm run check
 npm pack --dry-run
 ```
+
+Releases are managed by semantic-release. Conventional `feat:` and `fix:` commits merged to
+`main` determine the next version, create the GitHub release, and publish npm through OIDC.
 
 ## Attribution
 
