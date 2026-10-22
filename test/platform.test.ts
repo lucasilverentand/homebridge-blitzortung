@@ -12,7 +12,7 @@ vi.mock('../src/mapRenderer.js', () => ({
   LightningMapRenderer: class {
     public frame = frame;
     public recordStrike(): void {}
-    public setConnected(): void {}
+    public setMqttConnected(): void {}
   },
 }));
 

@@ -26,6 +26,7 @@
   "files": [
     "CHANGELOG.md",
     "config.schema.json",
+    "docs/relay-contract.md",
     "dist",
     "LICENSE",
     "README.md"
@@ -49,7 +50,7 @@
     "ffmpeg-for-homebridge": "^2.2.2",
     "mqtt": "^5.15.2",
     "ngeohash": "^0.6.3",
-    "sharp": "^0.35.3"
+    "sharp": "^0.35.5"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

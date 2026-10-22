@@ -33,6 +33,30 @@ blitzortung/1.1/<geohash characters separated by slashes>/...
 
 Each payload must be JSON containing numeric `lat` and `lon` properties.
 
+Retained MQTT messages never trigger alerts. When a payload includes `time`, it must be a
+Unix timestamp in **nanoseconds**, as used by the community relay. Integer strings preserve
+nanosecond precision; numeric values are also accepted. Timestamped strikes more than two
+minutes old or more than ten seconds in the future are rejected. A malformed timestamp is
+rejected rather than replaced with the current time.
+
+Within a running plugin, replay protection uses an optional stable `id` (a non-empty string
+up to 256 characters or a safe integer), or otherwise the source time and coordinates.
+The cache survives MQTT reconnects, keeps identities for 130 seconds, and holds at most
+10,000 identities, evicting the oldest at capacity. It is not persisted across plugin restarts.
+A relay sending only coordinates remains compatible, but cannot prove event age or identity;
+non-retained stale or replayed coordinate-only messages cannot be distinguished from new strikes.
+
+The map and logs distinguish **MQTT connectivity** from **upstream freshness**. A successful
+subscription proves that the broker accepted the topics, not that the relay is receiving live
+Blitzortung data. The available relay contract provides no upstream heartbeat or status proof,
+so upstream freshness is explicitly **unverified**. Quiet weather is not treated as an outage.
+The sensors report observed activity and configured expiry windows; a cleared storm sensor is
+not confirmation that the upstream feed is live or that no lightning is occurring.
+
+Failed subscriptions retry after 60 seconds, with bounded backoff and jitter up to five minutes.
+Transport reconnects use a 60-second interval. Shutdown cancels retries and ignores late events.
+See [the relay contract and verification boundaries](docs/relay-contract.md) for source references.
+
 Blitzortung's data usage policy requires third-party applications to serve their clients through
 their own intermediary service. This package deliberately does not default to the public relay
 operated for another integration and does not connect directly to Blitzortung websocket servers.

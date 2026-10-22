@@ -72,7 +72,7 @@ export class LightningMapRenderer {
   private readonly tilePromises = new Map<string, Promise<Buffer>>();
   private readonly warnedTiles = new Set<string>();
   private readonly fetchTile: TileFetcher;
-  private connected = false;
+  private mqttConnected = false;
   private revision = 0;
 
   constructor(private readonly options: MapRendererOptions) {
@@ -85,12 +85,16 @@ export class LightningMapRenderer {
     this.revision += 1;
   }
 
-  public setConnected(connected: boolean): void {
-    if (this.connected === connected) {
+  public setMqttConnected(connected: boolean): void {
+    if (this.mqttConnected === connected) {
       return;
     }
-    this.connected = connected;
+    this.mqttConnected = connected;
     this.revision += 1;
+  }
+
+  public feedStatus(): { mqttConnected: boolean; upstreamFreshness: 'unverified' } {
+    return { mqttConnected: this.mqttConnected, upstreamFreshness: 'unverified' };
   }
 
   public recentStrikes(now = new Date()): readonly NearbyStrike[] {
@@ -269,18 +273,19 @@ export class LightningMapRenderer {
     const radius = radiusPixels(config.latitude, config.radiusKm, config.camera.zoom);
     const title = escapeXml(config.camera.name);
     const attribution = escapeXml(config.camera.tileAttribution);
-    const status = this.connected ? 'Feed connected' : 'Feed unavailable';
-    const statusColour = this.connected ? '#30d158' : '#ff453a';
+    const status = this.feedStatus().mqttConnected ? 'MQTT connected' : 'MQTT unavailable';
+    const statusColour = this.mqttConnected ? '#30d158' : '#ff453a';
 
     return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">`
       + '<style>text{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}</style>'
       + `<circle cx="${width / 2}" cy="${height / 2}" r="${radius.toFixed(1)}" fill="#0a84ff" fill-opacity="0.08" stroke="#0a84ff" stroke-width="2" stroke-dasharray="7 5"/>`
       + markers
       + `<circle cx="${width / 2}" cy="${height / 2}" r="5" fill="#0a84ff" stroke="white" stroke-width="2"/>`
-      + '<rect x="12" y="12" width="248" height="58" rx="12" fill="#111827" fill-opacity="0.88"/>'
+      + '<rect x="12" y="12" width="248" height="78" rx="12" fill="#111827" fill-opacity="0.88"/>'
       + `<text x="26" y="36" fill="white" font-size="18" font-weight="700">${title}</text>`
       + `<circle cx="31" cy="55" r="5" fill="${statusColour}"/>`
       + `<text x="43" y="60" fill="#e5e7eb" font-size="13">${status} · ${strikes.length} recent</text>`
+      + '<text x="26" y="79" fill="#ffd60a" font-size="11">Upstream freshness unverified</text>'
       + `<rect x="0" y="${height - 27}" width="${width}" height="27" fill="#111827" fill-opacity="0.82"/>`
       + `<text x="12" y="${height - 9}" fill="#f3f4f6" font-size="11">Radius ${config.radiusKm} km · ${attribution}</text>`
       + '</svg>';
