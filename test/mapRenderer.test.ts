@@ -58,7 +58,7 @@ describe('LightningMapRenderer', () => {
     }).png().toBuffer();
     const fetchTile = vi.fn(() => Promise.resolve(tile));
     const renderer = new LightningMapRenderer({ config, cacheDirectory, fetchTile });
-    renderer.setConnected(true);
+    renderer.setMqttConnected(true);
     renderer.recordStrike({
       latitude: 52.37,
       longitude: 4.91,
@@ -97,5 +97,19 @@ describe('LightningMapRenderer', () => {
       receivedAt: new Date('2026-07-13T11:45:00Z'),
     });
     expect(renderer.recentStrikes(new Date('2026-07-13T12:00:00Z'))).toHaveLength(1);
+  });
+
+  it('keeps MQTT availability separate from unknown upstream freshness during quiet weather', () => {
+    vi.useFakeTimers();
+    try {
+      const renderer = new LightningMapRenderer({ config, cacheDirectory: tmpdir() });
+      renderer.setMqttConnected(true);
+      vi.advanceTimersByTime(24 * 60 * 60_000);
+      expect(renderer.feedStatus()).toEqual({ mqttConnected: true, upstreamFreshness: 'unverified' });
+      renderer.setMqttConnected(false);
+      expect(renderer.feedStatus()).toEqual({ mqttConnected: false, upstreamFreshness: 'unverified' });
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

@@ -26,6 +26,7 @@
   "files": [
     "CHANGELOG.md",
     "config.schema.json",
+    "docs/relay-contract.md",
     "dist",
     "LICENSE",
     "README.md"

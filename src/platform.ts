@@ -124,17 +124,17 @@ export class BlitzortungPlatform implements DynamicPlatformPlugin {
     this.client = new BlitzortungClient(this.config);
     this.client.on('connected', () => {
       this.log.info(
-        'Connected to %s:%d with %d geohash subscription(s).',
+        'MQTT subscribed to %s:%d with %d geohash subscription(s); upstream freshness is unverified.',
         this.config?.mqttHost,
         this.config?.mqttPort,
         this.client?.subscriptions().length ?? 0,
       );
       lightningAccessory.setConnected(true);
-      this.mapRenderer?.setConnected(true);
+      this.mapRenderer?.setMqttConnected(true);
     });
     this.client.on('disconnected', () => {
       lightningAccessory.setConnected(false);
-      this.mapRenderer?.setConnected(false);
+      this.mapRenderer?.setMqttConnected(false);
     });
     this.client.on('error', error => this.log.warn('Blitzortung feed error: %s', error.message));
     this.client.on('strike', strike => {
@@ -145,8 +145,10 @@ export class BlitzortungPlatform implements DynamicPlatformPlugin {
   }
 
   private shutdown(): void {
+    void this.client?.disconnect().catch(error => {
+      this.log.warn('MQTT shutdown failed: %s', error instanceof Error ? error.message : String(error));
+    });
     this.state?.dispose();
     this.mapCamera?.stop();
-    void this.client?.disconnect();
   }
 }
